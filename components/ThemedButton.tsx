@@ -12,7 +12,8 @@ export type ThemedButtonProps = {
   onPress: () => void;
   lightColor?: string;
   darkColor?: string;
-  type?: "primary" | "secondary" | "outline";
+  variant?: "contained" | "outlined" | "text";
+  fullWidth?: boolean;
   style?: ViewStyle;
   textStyle?: TextStyle;
 };
@@ -22,9 +23,11 @@ export function ThemedButton({
   onPress,
   lightColor,
   darkColor,
-  type = "primary",
+  variant = "contained",
+  fullWidth = false,
   style,
   textStyle,
+  ...props
 }: ThemedButtonProps) {
   const backgroundColor = useThemeColor(
     { light: lightColor, dark: darkColor },
@@ -32,22 +35,23 @@ export function ThemedButton({
   );
 
   const textColor =
-    type === "outline" ? backgroundColor : useThemeColor({}, "buttonText");
+    variant === "contained" ? useThemeColor({}, "buttonText") : backgroundColor;
+
+  const borderColor = backgroundColor;
 
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
         styles.base,
-        type === "primary" ? styles.primary : undefined,
-        type === "secondary" ? styles.secondary : undefined,
-        type === "outline" ? styles.outline : undefined,
-        {
-          backgroundColor: type === "outline" ? "transparent" : backgroundColor,
-        },
+        variant === "contained" && { backgroundColor },
+        variant === "outlined" && { borderColor, borderWidth: 2 },
+        variant === "text" && { backgroundColor: "transparent" },
+        fullWidth ? styles.fullWidth : {},
         pressed && styles.pressed,
         style,
       ]}
+      {...props}
     >
       <Text style={[styles.text, { color: textColor }, textStyle]}>
         {title}
@@ -64,21 +68,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  fullWidth: {
+    width: "100%",
+  },
   text: {
     fontSize: 16,
     fontWeight: "bold",
   },
   pressed: {
     opacity: 0.7,
-  },
-  primary: {
-    backgroundColor: "#007AFF",
-  },
-  secondary: {
-    backgroundColor: "#5856D6",
-  },
-  outline: {
-    borderWidth: 2,
-    borderColor: "#007AFF",
   },
 });
